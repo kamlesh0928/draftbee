@@ -32,9 +32,12 @@ client = Client(command_prefix='!', intents=intents)
 
 GUILD_ID = discord.Object(id=os.getenv('DISCORD_SERVER_ID'))
 
-@client.tree.command(name='embeds', description='I will print what you write', guild=GUILD_ID)
-async def embeds(interaction: discord.Interaction):
-    embed = discord.Embed(title='I am a Title', description='I am description')
-    await interaction.response.send_message(embed=embed)
+@client.tree.command(name='hello', description='Say hello to the bot', guild=GUILD_ID)
+async def hello(interaction: discord.Interaction):
+    await interaction.response.send_message('Hello!')
+
+@client.tree.command(name='printer', description='I will print what you write', guild=GUILD_ID)
+async def printer(interaction: discord.Interaction, printer: str):
+    await interaction.response.send_message(printer)
 
 client.run(os.getenv('DISCORD_BOT_TOKEN'))
