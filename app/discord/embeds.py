@@ -1,6 +1,6 @@
+
 import discord
 from discord.ext import commands
-from discord import app_commands
 from dotenv import load_dotenv
 import os
 
@@ -33,12 +33,14 @@ client = Client(command_prefix='!', intents=intents)
 
 GUILD_ID = discord.Object(id=os.getenv('DISCORD_SERVER_ID'))
 
-@client.tree.command(name='hello', description='Say hello to the bot', guild=GUILD_ID)
-async def hello(interaction: discord.Interaction):
-    await interaction.response.send_message('Hello!')
-
-@client.tree.command(name='printer', description='I will print what you write', guild=GUILD_ID)
-async def printer(interaction: discord.Interaction, printer: str):
-    await interaction.response.send_message(printer)
+@client.tree.command(name='embeds', description='I will print what you write', guild=GUILD_ID)
+async def embeds(interaction: discord.Interaction):
+    embed = discord.Embed(title='I am a Title', url='https://github.com/kamlesh0928', description='I am description', color=discord.Color.blue())
+    embed.set_thumbnail(url='https://avatars.githubusercontent.com/u/12345678?v=4')
+    embed.add_field(name='Field 1', value='This is the value of field 1', inline=False)
+    embed.add_field(name='Field 2', value='This is the value of field 2')
+    embed.set_footer(text='This is the footer text')
+    embed.set_author(name=interaction.user.name, url='https://github.com/kamlesh0928')
+    await interaction.response.send_message(embed=embed)
 
 client.run(os.getenv('DISCORD_BOT_TOKEN'))
