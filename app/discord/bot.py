@@ -1,8 +1,6 @@
 import discord
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from app.config.settings import Settings
 
 
 class Client(discord.Client):
@@ -21,4 +19,4 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = Client(intents=intents)
-client.run(os.getenv('DISCORD_BOT_TOKEN'))
+client.run(Settings.DISCORD_BOT_TOKEN)

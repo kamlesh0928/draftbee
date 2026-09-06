@@ -49,3 +49,6 @@ coverage.xml
 # Pipenv / Poetry / etc.
 Pipfile.lock
 poetry.lock
+
+# My notes
+notes.txt
