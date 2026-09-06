@@ -1,9 +1,7 @@
 import discord
 from discord.ext import commands
-from dotenv import load_dotenv
-import os
 
-load_dotenv()
+from app.config.settings import Settings
 
 
 class Client(commands.Bot):
@@ -11,7 +9,7 @@ class Client(commands.Bot):
         print(f'Logged on as {self.user}')
 
         try:
-            guild = discord.Object(id=os.getenv('DISCORD_SERVER_ID'))
+            guild = discord.Object(id=Settings.DISCORD_SERVER_ID)
             synced = await self.tree.sync(guild=guild)
             print(f'Synced {len(synced)} command(s) to the guild.')
 
@@ -44,10 +42,10 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = Client(command_prefix='!', intents=intents)
 
-GUILD_ID = discord.Object(id=os.getenv('DISCORD_SERVER_ID'))
+GUILD_ID = discord.Object(id=Settings.DISCORD_SERVER_ID)
 
 @client.tree.command(name='button', description='Displaying a button', guild=GUILD_ID)
 async def button(interaction: discord.Interaction):
     await interaction.response.send_message(view=View())
 
-client.run(os.getenv('DISCORD_BOT_TOKEN'))
+client.run(Settings.DISCORD_BOT_TOKEN)
