@@ -3,13 +3,15 @@ from discord.ext import commands
 
 from app.config.settings import Settings
 
+settings = Settings()
+
 
 class Client(commands.Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}')
 
         try:
-            guild = discord.Object(id=Settings.DISCORD_SERVER_ID)
+            guild = discord.Object(id=settings.DISCORD_SERVER_ID)
             synced = await self.tree.sync(guild=guild)
             print(f'Synced {len(synced)} command(s) to the guild.')
 
@@ -28,7 +30,7 @@ intents = discord.Intents.default()
 intents.message_content = True
 client = Client(command_prefix='!', intents=intents)
 
-GUILD_ID = discord.Object(id=Settings.DISCORD_SERVER_ID)
+GUILD_ID = discord.Object(id=settings.DISCORD_SERVER_ID)
 
 @client.tree.command(name='embeds', description='I will print what you write', guild=GUILD_ID)
 async def embeds(interaction: discord.Interaction):
@@ -40,4 +42,4 @@ async def embeds(interaction: discord.Interaction):
     embed.set_author(name=interaction.user.name, url='https://github.com/kamlesh0928')
     await interaction.response.send_message(embed=embed)
 
-client.run(Settings.DISCORD_BOT_TOKEN)
+client.run(settings.DISCORD_BOT_TOKEN)
