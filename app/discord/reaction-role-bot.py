@@ -3,13 +3,15 @@ from discord.ext import commands
 
 from app.config.settings import Settings
 
+settings = Settings()
+
 
 class Client(commands.Bot):
     async def on_ready(self):
         print(f'Logged on as {self.user}!')
 
         try:
-            guild = discord.Object(id=Settings.DISCORD_SERVER_ID)
+            guild = discord.Object(id=settings.DISCORD_SERVER_ID)
             synced = await self.tree.sync(guild=guild)
             print(f'Synced {len(synced)} commands to guild {guild.id}')
 
@@ -91,7 +93,7 @@ intents.guilds = True
 intents.members = True
 client = Client(command_prefix="!", intents=intents)
 
-GUILD_ID = discord.Object(id=Settings.DISCORD_SERVER_ID)
+GUILD_ID = discord.Object(id=settings.DISCORD_SERVER_ID)
 
 @client.tree.command(name='hello', description='Say hello', guild=GUILD_ID)
 async def hello(interaction: discord.Interaction):
@@ -126,4 +128,4 @@ async def color_roles(interaction: discord.Interaction):
 
     await interaction.followup.send('Colour role message created!', ephemeral=True)
 
-client.run(Settings.DISCORD_BOT_TOKEN)
+client.run(settings.DISCORD_BOT_TOKEN)

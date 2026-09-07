@@ -2,6 +2,8 @@ import discord
 
 from app.config.settings import Settings
 
+settings = Settings()
+
 
 class Client(discord.Client):
     async def on_ready(self):
@@ -19,4 +21,4 @@ intents = discord.Intents.default()
 intents.message_content = True
 
 client = Client(intents=intents)
-client.run(Settings.DISCORD_BOT_TOKEN)
+client.run(settings.DISCORD_BOT_TOKEN)
