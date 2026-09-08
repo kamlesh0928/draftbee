@@ -67,4 +67,3 @@ def discover_topics() -> dict:
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}")
 
-discover_topics()
