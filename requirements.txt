@@ -13,3 +13,4 @@ beautifulsoup4
 trafilatura
 python-dateutil
 google-genai
+psycopg2-binary

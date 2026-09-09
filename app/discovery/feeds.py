@@ -1,5 +1,6 @@
 import json
 from google import genai
+from google.genai import types
 
 from app.config.settings import Settings
 
@@ -7,11 +8,11 @@ settings = Settings()
 DATE = settings.DATE
 
 
-def discover_topics() -> dict:
+def discover_topics() -> list[dict]:
     """
     Discover the current trending topics in the software development industry.
     This function will generate a list of 5 engaging and informative post ideas using Google Gemini AI.
-    Returns: It just return only 1 idea with the highest rank.
+    Returns all 5 ranked ideas in a JSON array format, with each idea containing a title, description, rank, and explanation for the assigned rank.
     """
 
     PROMPT = f"""
@@ -45,13 +46,17 @@ def discover_topics() -> dict:
 
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
-    response = client.interactions.create(
+    response = client.models.generate_content(
         model="gemini-3.8-flash",
-        input=PROMPT
+        contents=PROMPT,
+        config=types.GenerateContentConfig(
+            response_mime_type="application/json",
+            temperature=0.4,
+        )
     )
 
     # Extract the JSON array from the response
-    response_text = response.output_text.strip()
+    response_text = response.text.strip()
 
     # Parse the response text to extract the JSON array.
     try:
@@ -60,9 +65,7 @@ def discover_topics() -> dict:
         if not isinstance(topics, list) or len(topics) != 5:
             raise ValueError("Excpected a JSON array containing exactly 5 ideas.")
 
-        highest_ranked = min(topics, key=lambda topic: topic["rank"])
-
-        return highest_ranked
+        return sorted(topics, key=lambda t: t["rank"])
         
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}")
