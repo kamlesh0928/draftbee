@@ -1,5 +1,6 @@
 from sqlalchemy.orm import configure_mappers
-from app.database.models import Topic, Post, Source
+
+from app.database.models import Post, Source, Topic
 
 
 def test_mappers_configure_without_error():
