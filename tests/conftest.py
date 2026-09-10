@@ -2,8 +2,9 @@ import pytest
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
-from app.database.base import Base
 from app.database import models  # noqa: F401 — registers all models with Base
+from app.database.base import Base
+
 
 @pytest.fixture
 def db_session():

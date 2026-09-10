@@ -32,6 +32,8 @@ Thumbs.db
 # Byte-compiled / cache files
 *.manifest
 *.spec
+.ruff_cache/
+.mypy_cache/
 
 # PyInstaller
 build/

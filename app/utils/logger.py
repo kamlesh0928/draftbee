@@ -2,6 +2,7 @@ import logging
 
 logging.basicConfig(level=logging.INFO)
 
+
 def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     """
     This is a logger with the specified name and level.
@@ -22,7 +23,9 @@ def setup_logger(name: str, level: int = logging.INFO) -> logging.Logger:
     ch.setLevel(level)
 
     # Create formatter and add it to the handler
-    formatter = logging.Formatter("%(asctime)s | %(name)-15s | %(levelname)-8s | %(message)s")
+    formatter = logging.Formatter(
+        "%(asctime)s | %(name)-15s | %(levelname)-8s | %(message)s"
+    )
     ch.setFormatter(formatter)
 
     # Add the handler to the logger

@@ -1,4 +1,5 @@
 import json
+
 from google import genai
 from google.genai import types
 
@@ -52,11 +53,16 @@ def discover_topics() -> list[dict]:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             temperature=0.4,
-        )
+        ),
     )
 
     # Extract the JSON array from the response
-    response_text = response.text.strip()
+    response_text = response.text
+    
+    if response_text is None:
+        raise ValueError("Gemini API returned no text content in the response.")
+
+    response_text = response_text.strip()
 
     # Parse the response text to extract the JSON array.
     try:
@@ -66,7 +72,6 @@ def discover_topics() -> list[dict]:
             raise ValueError("Excpected a JSON array containing exactly 5 ideas.")
 
         return sorted(topics, key=lambda t: t["rank"])
-        
+
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}")
-
