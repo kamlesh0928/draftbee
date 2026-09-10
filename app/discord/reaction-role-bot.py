@@ -2,13 +2,15 @@ import discord
 from discord.ext import commands
 
 from app.config.settings import Settings
-from app.utils.logger import Logger
+from app.utils.logger import setup_logger
 
 settings = Settings()
-logger = Logger()
+logger = setup_logger("Discord Bot")
 
 
 class Client(commands.Bot):
+    color_roles_message_id: int | None = None
+
     async def on_ready(self):
         print(f"Logged on as {self.user}!")
 
@@ -18,7 +20,7 @@ class Client(commands.Bot):
             print(f"Synced {len(synced)} commands to guild {guild.id}")
 
         except discord.HTTPException:
-            logger.exception("Error syncing commands")
+            logger.error("Error syncing commands")
 
     async def on_message(self, message):
         if message.author == self.user:
@@ -32,14 +34,10 @@ class Client(commands.Bot):
             return
 
         guild = reaction.message.guild
-
         if not guild:
             return
 
-        if (
-            hasattr(self, "colour_role_message_id")
-            and reaction.message.id != self.colour_role_message_id
-        ):
+        if self.color_roles_message_id is not None and reaction.message.id != self.color_roles_message_id:
             return
 
         emoji = str(reaction.emoji)
@@ -65,14 +63,10 @@ class Client(commands.Bot):
             return
 
         guild = reaction.message.guild
-
         if not guild:
             return
 
-        if (
-            hasattr(self, "colour_role_message_id")
-            and reaction.message.id != self.colour_role_message_id
-        ):
+        if self.color_roles_message_id is not None and reaction.message.id != self.color_roles_message_id:
             return
 
         emoji = str(reaction.emoji)
@@ -115,7 +109,7 @@ async def hello(interaction: discord.Interaction):
     guild=GUILD_ID,
 )
 async def color_roles(interaction: discord.Interaction):
-    if not interaction.user.guild_permissions.administrator:
+    if not isinstance(interaction.user, discord.Member) or not interaction.user.guild_permissions.administrator:
         await interaction.response.send_message(
             "You must be an admin to run this command", ephemeral=True
         )
@@ -135,14 +129,22 @@ async def color_roles(interaction: discord.Interaction):
     embed = discord.Embed(
         title="Pick you Color", description=description, color=discord.Color.blurple()
     )
-    message = await interaction.channel.send(embed=embed)
+
+    channel = interaction.channel
+    if not isinstance(channel, (discord.TextChannel, discord.Thread, discord.VoiceChannel, discord.StageChannel)):
+        await interaction.followup.send(
+            "This command can't be used in this channel type.", ephemeral=True
+        )
+        return
+
+    message = await channel.send(embed=embed)
 
     emojis = ["❤️", "💙", "💛", "💚", "🧡"]
 
     for emoji in emojis:
         await message.add_reaction(emoji)
 
-    client.colour_role_message_id = message.id
+    client.color_roles_message_id = message.id
 
     await interaction.followup.send("Colour role message created!", ephemeral=True)
 

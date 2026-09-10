@@ -57,7 +57,12 @@ def discover_topics() -> list[dict]:
     )
 
     # Extract the JSON array from the response
-    response_text = response.text.strip()
+    response_text = response.text
+    
+    if response_text is None:
+        raise ValueError("Gemini API returned no text content in the response.")
+
+    response_text = response_text.strip()
 
     # Parse the response text to extract the JSON array.
     try:

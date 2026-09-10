@@ -2,10 +2,10 @@ import discord
 from discord.ext import commands
 
 from app.config.settings import Settings
-from app.utils.logger import Logger
+from app.utils.logger import setup_logger
 
 settings = Settings()
-logger = Logger()
+logger = setup_logger("Discord Bot")
 
 
 class Client(commands.Bot):
@@ -18,7 +18,7 @@ class Client(commands.Bot):
             print(f"Synced {len(synced)} command(s) to the guild.")
 
         except discord.HTTPException:
-            logger.exception("Error syncing commands")
+            logger.error("Error syncing commands")
 
     async def on_message(self, message):
         if message.author == self.user:

@@ -1,5 +1,6 @@
 import datetime
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
@@ -10,7 +11,9 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     # Current Date
-    DATE: str = datetime.datetime.now(tz="Asia/Kolkata").date
+    DATE: str = datetime.datetime.now(
+        ZoneInfo("Asia/Kolkata")
+    ).date().isoformat()
 
     # Database
     DATABASE_URL: str

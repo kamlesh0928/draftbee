@@ -33,6 +33,7 @@ Thumbs.db
 *.manifest
 *.spec
 .ruff_cache/
+.mypy_cache/
 
 # PyInstaller
 build/
