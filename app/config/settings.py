@@ -11,9 +11,7 @@ class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=BASE_DIR / ".env", extra="ignore")
 
     # Current Date
-    DATE: str = datetime.datetime.now(
-        ZoneInfo("Asia/Kolkata")
-    ).date().isoformat()
+    DATE: str = datetime.datetime.now(ZoneInfo("Asia/Kolkata")).date().isoformat()
 
     # Database
     DATABASE_URL: str
@@ -24,6 +22,7 @@ class Settings(BaseSettings):
 
     # Gemini
     GEMINI_API_KEY: str
+    GEMINI_MODEL: str
 
 
 settings = Settings()

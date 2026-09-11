@@ -48,7 +48,7 @@ def discover_topics() -> list[dict]:
     client = genai.Client(api_key=settings.GEMINI_API_KEY)
 
     response = client.models.generate_content(
-        model="gemini-3.8-flash",
+        model=settings.GEMINI_MODEL,
         contents=PROMPT,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
@@ -58,7 +58,7 @@ def discover_topics() -> list[dict]:
 
     # Extract the JSON array from the response
     response_text = response.text
-    
+
     if response_text is None:
         raise ValueError("Gemini API returned no text content in the response.")
 
