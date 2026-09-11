@@ -37,7 +37,10 @@ class Client(commands.Bot):
         if not guild:
             return
 
-        if self.color_roles_message_id is not None and reaction.message.id != self.color_roles_message_id:
+        if (
+            self.color_roles_message_id is not None
+            and reaction.message.id != self.color_roles_message_id
+        ):
             return
 
         emoji = str(reaction.emoji)
@@ -66,7 +69,10 @@ class Client(commands.Bot):
         if not guild:
             return
 
-        if self.color_roles_message_id is not None and reaction.message.id != self.color_roles_message_id:
+        if (
+            self.color_roles_message_id is not None
+            and reaction.message.id != self.color_roles_message_id
+        ):
             return
 
         emoji = str(reaction.emoji)
@@ -109,7 +115,10 @@ async def hello(interaction: discord.Interaction):
     guild=GUILD_ID,
 )
 async def color_roles(interaction: discord.Interaction):
-    if not isinstance(interaction.user, discord.Member) or not interaction.user.guild_permissions.administrator:
+    if (
+        not isinstance(interaction.user, discord.Member)
+        or not interaction.user.guild_permissions.administrator
+    ):
         await interaction.response.send_message(
             "You must be an admin to run this command", ephemeral=True
         )
@@ -131,7 +140,15 @@ async def color_roles(interaction: discord.Interaction):
     )
 
     channel = interaction.channel
-    if not isinstance(channel, (discord.TextChannel, discord.Thread, discord.VoiceChannel, discord.StageChannel)):
+    if not isinstance(
+        channel,
+        (
+            discord.TextChannel,
+            discord.Thread,
+            discord.VoiceChannel,
+            discord.StageChannel,
+        ),
+    ):
         await interaction.followup.send(
             "This command can't be used in this channel type.", ephemeral=True
         )
