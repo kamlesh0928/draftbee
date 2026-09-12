@@ -1,15 +1,10 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 from sqlalchemy import CheckConstraint, Column, DateTime, Integer, String, Text
 from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.database.base import Base
-
-if TYPE_CHECKING:
-    from app.database.models.post import Post
 
 STATUS_PENDING = "pending"
 STATUS_USED = "used"
@@ -33,4 +28,4 @@ class Topic(Base):
     status = Column(String(20), nullable=False, default=STATUS_PENDING)
     created_at = Column(DateTime(timezone=True), server_default=func.now())
 
-    posts = relationship("Post", back_populates="topic", uselist=True)
+    posts = relationship("Post", back_populates="topic", uselist=True)  # type: ignore
