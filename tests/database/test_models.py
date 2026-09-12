@@ -8,17 +8,17 @@ def test_mappers_configure_without_error():
 
 
 def test_post_belongs_to_topic(db_session):
-    topic = Topic(name="System Design")
+    topic = Topic(title="System Design", rank=1)
     post = Post(title="Load Balancers 101", content="...", topic=topic)
     db_session.add(post)
     db_session.commit()
 
-    assert post.topic.name == "System Design"
+    assert post.topic.title == "System Design"
     assert topic.posts == [post]
 
 
 def test_source_links_back_to_post(db_session):
-    topic = Topic(name="AI/ML")
+    topic = Topic(title="AI/ML", rank=1)
     post = Post(title="Caching Strategies", content="...", topic=topic)
     source = Source(name="HN", url="https://news.ycombinator.com/x", post=post)
     db_session.add(source)

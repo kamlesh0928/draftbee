@@ -1,25 +1,31 @@
 from app.agents.writer_agent import generate_post
-from app.discovery.feeds import discover_topics
+from app.database.models.topic import STATUS_REJECTED, STATUS_USED
+from app.discovery.feeds import get_topics
+from app.discovery.repository import mark_topic_status
 from app.utils.logger import setup_logger
 
-logger = setup_logger("Agent")
+logger = setup_logger("orchestrator")
 
 
-def get_idea():
+def run_pipeline() -> None:
     """
-    This function will will iterate over every post idea if the user accepts the post then the function will stop.
+    Work through topic ideas (cached first, freshly generated if needed) one at a time. Stops as soon as one post is approved.
     """
 
-    while True:
-        topics = discover_topics()
-
-        print("========= Got All Topics ===========")
+    while (True):
+        topics = get_topics()
+        logger.info("Got %d candidate topic(s) to try.", len(topics))
 
         for topic in topics:
+            assert topic.id is not None, "topic must be persisted before use"
+
             if generate_post(topic):
+                mark_topic_status(topic.id, STATUS_USED)
                 return
+            mark_topic_status(topic.id, STATUS_REJECTED)
 
-        logger.info("All topics are rejected re-generating the topics.")
+        logger.info("All cached topics rejected, will generate a fresh batch.")
 
 
-get_idea()
+if __name__ == "__main__":
+    run_pipeline()
