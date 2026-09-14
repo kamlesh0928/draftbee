@@ -18,7 +18,7 @@ class Settings(BaseSettings):
 
     # Discord
     DISCORD_BOT_TOKEN: str
-    DISCORD_SERVER_ID: int
+    DISCORD_APPROVAL_CHANNEL_ID: int
 
     # Gemini
     GEMINI_API_KEY: str

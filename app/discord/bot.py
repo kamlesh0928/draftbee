@@ -1,24 +1,45 @@
 import discord
+from discord.ext import commands
 
-from app.config.settings import Settings
+from app.config.settings import settings
+from app.utils.logger import setup_logger
 
-settings = Settings()
+logger = setup_logger("discord-bot")
 
-
-class Client(discord.Client):
-    async def on_ready(self):
-        print(f"Logged on as {self.user}")
-
-    async def on_message(self, message):
-        if message.author == self.user:
-            return
-
-        if message.content.startswith("hello"):
-            await message.channel.send(f"Hello there {message.author}!")
+intents = discord.Intents.default()  # slash commands only — no privileged intents needed
+bot = commands.Bot(command_prefix="!", intents=intents)
 
 
-intents = discord.Intents.default()
-intents.message_content = True
+async def send_for_approval(embed: discord.Embed, view: discord.ui.View) -> discord.Message:
+    """Post a draft + its Accept/Reject/Re-try buttons to the approval channel."""
+    channel = bot.get_channel(settings.DISCORD_APPROVAL_CHANNEL_ID)
+    if channel is None:
+        channel = await bot.fetch_channel(settings.DISCORD_APPROVAL_CHANNEL_ID)
 
-client = Client(intents=intents)
-client.run(settings.DISCORD_BOT_TOKEN)
+    if not isinstance(channel, discord.abc.Messageable):
+        raise TypeError(
+            f"Approval channel must be messageable, got {type(channel).__name__}"
+        )
+    
+    return await channel.send(embed=embed, view=view)
+
+
+@bot.event
+async def on_ready() -> None:
+    guild = discord.Object(id=settings.DISCORD_APPROVAL_CHANNEL_ID)
+    bot.tree.copy_global_to(guild=guild)
+    synced = await bot.tree.sync(guild=guild)
+    logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_APPROVAL_CHANNEL_ID)
+    logger.info("Discord bot logged in as %s", bot.user)
+
+
+def run_discord_bot() -> None:
+    from app.discord import (
+        commands as _commands,  # noqa: F401 — registers /generate via decorator
+    )
+
+    bot.run(settings.DISCORD_BOT_TOKEN)
+
+
+if __name__ == "__main__":
+    run_discord_bot()
