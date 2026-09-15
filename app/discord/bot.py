@@ -26,10 +26,10 @@ async def send_for_approval(embed: discord.Embed, view: discord.ui.View) -> disc
 
 @bot.event
 async def on_ready() -> None:
-    guild = discord.Object(id=settings.DISCORD_APPROVAL_CHANNEL_ID)
+    guild = discord.Object(id=settings.DISCORD_SERVER_ID)
     bot.tree.copy_global_to(guild=guild)
     synced = await bot.tree.sync(guild=guild)
-    logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_APPROVAL_CHANNEL_ID)
+    logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_SERVER_ID)
     logger.info("Discord bot logged in as %s", bot.user)
 
 

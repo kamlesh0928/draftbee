@@ -1,5 +1,7 @@
 import json
 
+import pytest
+
 from app.discovery import feeds
 
 SAMPLE_RESPONSE = json.dumps(
@@ -35,7 +37,7 @@ def test_get_topics_uses_db_cache_when_available(mocker):
     result = feeds.get_topics()
 
     assert result == cached
-    mock_generate.assert_not_called()  # proves we skipped calling Gemini
+    mock_generate.assert_not_called()
 
 
 def test_get_topics_falls_back_to_ai_when_cache_empty(mocker):
@@ -47,3 +49,33 @@ def test_get_topics_falls_back_to_ai_when_cache_empty(mocker):
 
     assert result == ["saved-idea"]
     mock_save.assert_called_once_with(["fake-idea"])
+
+
+def test_generate_topic_ideas_raises_on_none_response_text(mocker):
+    fake_response = mocker.Mock(text=None)
+    mock_client = mocker.Mock()
+    mock_client.models.generate_content.return_value = fake_response
+    mocker.patch("app.discovery.feeds.get_client", return_value=mock_client)
+
+    with pytest.raises(ValueError):
+        feeds._generate_topic_ideas()
+
+
+def test_generate_topic_ideas_raises_on_invalid_json(mocker):
+    fake_response = mocker.Mock(text="not valid json")
+    mock_client = mocker.Mock()
+    mock_client.models.generate_content.return_value = fake_response
+    mocker.patch("app.discovery.feeds.get_client", return_value=mock_client)
+
+    with pytest.raises(ValueError):
+        feeds._generate_topic_ideas()
+
+
+def test_generate_topic_ideas_raises_on_wrong_count(mocker):
+    fake_response = mocker.Mock(text=json.dumps([{"title": "only one", "rank": 1}]))
+    mock_client = mocker.Mock()
+    mock_client.models.generate_content.return_value = fake_response
+    mocker.patch("app.discovery.feeds.get_client", return_value=mock_client)
+
+    with pytest.raises(ValueError):
+        feeds._generate_topic_ideas()
