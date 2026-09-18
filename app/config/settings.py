@@ -25,6 +25,14 @@ class Settings(BaseSettings):
     GEMINI_API_KEY: str
     GEMINI_MODEL: str
 
+    # LinkedIn
+    LINKEDIN_CLIENT_ID: str
+    LINKEDIN_CLIENT_SECRET: str
+    LINKEDIN_ACCESS_TOKEN: str
+    LINKEDIN_REFRESH_TOKEN: str
+    LINKEDIN_PERSON_ID: str
+    LINKEDIN_API_VERSION: str
+
 
 settings = Settings()
 

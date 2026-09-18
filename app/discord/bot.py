@@ -39,7 +39,3 @@ def run_discord_bot() -> None:
     )
 
     bot.run(settings.DISCORD_BOT_TOKEN)
-
-
-if __name__ == "__main__":
-    run_discord_bot()
