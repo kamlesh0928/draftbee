@@ -93,7 +93,7 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
     return validated_posts
 
 
-async def generate_post(topic: Topic) -> bool:
+async def generate_post(topic: Topic) -> ApprovedPost | None:
     """
     Draft a post for `topic`, send it to Discord, and keep regenerating on
     "Re-try" until the reviewer Accepts or Rejects. Returns True if accepted.
@@ -152,7 +152,6 @@ async def generate_post(topic: Topic) -> bool:
         if decision == ApprovalDecision.RETRY:
             continue
         if decision == ApprovalDecision.ACCEPTED:
-            ApprovedPost(linkedin_content=linkedin_post, x_content=x_post)
-            return True
+            return ApprovedPost(linkedin_content=linkedin_post, x_content=x_post)
 
-        return False
+        return None

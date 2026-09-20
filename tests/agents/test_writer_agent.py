@@ -52,7 +52,7 @@ def test_draft_post_raises_on_non_string_platform(mocker):
 
 
 @pytest.mark.asyncio
-async def test_generate_post_returns_true_on_accept(mocker):
+async def test_generate_post_returns_approved_post_on_accept(mocker):
     mocker.patch("app.agents.writer_agent._draft_post", return_value=SAMPLE_POSTS)
     mocker.patch("app.agents.writer_agent.send_for_approval", new=AsyncMock(return_value=MagicMock()))
 
@@ -62,11 +62,13 @@ async def test_generate_post_returns_true_on_accept(mocker):
 
     result = await writer_agent.generate_post(_FakeTopic())
 
-    assert result is True
+    assert result is not None
+    assert result.linkedin_content == "LinkedIn body"
+    assert result.x_content == "X body"
 
 
 @pytest.mark.asyncio
-async def test_generate_post_returns_false_on_reject(mocker):
+async def test_generate_post_returns_none_on_reject(mocker):
     mocker.patch("app.agents.writer_agent._draft_post", return_value=SAMPLE_POSTS)
     mocker.patch("app.agents.writer_agent.send_for_approval", new=AsyncMock(return_value=MagicMock()))
 
@@ -76,7 +78,7 @@ async def test_generate_post_returns_false_on_reject(mocker):
 
     result = await writer_agent.generate_post(_FakeTopic())
 
-    assert result is False
+    assert result is None
 
 
 @pytest.mark.asyncio
@@ -92,7 +94,8 @@ async def test_generate_post_redrafts_on_retry_then_accepts(mocker):
 
     result = await writer_agent.generate_post(_FakeTopic())
 
-    assert result is True
+    assert result is not None
+    assert result.linkedin_content == "LinkedIn body"
     assert mock_draft.call_count == 2
 
 

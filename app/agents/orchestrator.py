@@ -2,12 +2,18 @@ from app.agents.writer_agent import generate_post
 from app.database.models.topic import STATUS_REJECTED, STATUS_USED
 from app.discovery.feeds import get_topics
 from app.discovery.repository import mark_topic_status
+from app.publishers.linkedin import LinkedInPublishError, publish_post
 from app.utils.logger import setup_logger
 
 logger = setup_logger("orchestrator")
 
 
 async def run_pipeline() -> None:
+    """
+    Work through topic ideas (cached first, freshly generated if needed)
+    one at a time. Stops as soon as one post is approved and published.
+    """
+
     while True:
         topics = get_topics()
         logger.info("Got %d candidate topic(s) to try.", len(topics))
@@ -19,11 +25,11 @@ async def run_pipeline() -> None:
             if approved is not None:
                 mark_topic_status(topic.id, STATUS_USED)
 
-                # try:
-                #     publish_post(linkedin_content)
-                # except LinkedInPublishError:
-                #     logger.exception("Failed to publish to LinkedIn for topic '%s'", topic.title)
-                # return
+                try:
+                    publish_post(approved.linkedin_content)
+                except LinkedInPublishError:
+                    logger.exception("Failed to publish to LinkedIn for topic '%s'", topic.title)
+                return
 
             mark_topic_status(topic.id, STATUS_REJECTED)
 

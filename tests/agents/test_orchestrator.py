@@ -2,6 +2,7 @@ import pytest
 
 from app.agents import orchestrator
 from app.database.models.topic import STATUS_REJECTED, STATUS_USED
+from app.publishers.linkedin import LinkedInPublishError
 
 
 class _FakeTopic:
@@ -14,22 +15,27 @@ class _FakeTopic:
 @pytest.mark.asyncio
 async def test_run_pipeline_stops_on_first_accepted_topic(mocker):
     topics = [_FakeTopic(id=1), _FakeTopic(id=2)]
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")
     mocker.patch("app.agents.orchestrator.get_topics", return_value=topics)
-    mock_generate_post = mocker.patch("app.agents.orchestrator.generate_post", side_effect=[True])
+    mock_generate_post = mocker.patch("app.agents.orchestrator.generate_post", side_effect=[approved])
     mock_mark_status = mocker.patch("app.agents.orchestrator.mark_topic_status")
+    mock_publish = mocker.patch("app.agents.orchestrator.publish_post")
 
     await orchestrator.run_pipeline()
 
     mock_generate_post.assert_awaited_once_with(topics[0])
     mock_mark_status.assert_called_once_with(1, STATUS_USED)
+    mock_publish.assert_called_once_with("Fake LinkedIn content")
 
 
 @pytest.mark.asyncio
 async def test_run_pipeline_tries_next_topic_after_rejection(mocker):
     topics = [_FakeTopic(id=1), _FakeTopic(id=2)]
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")
     mocker.patch("app.agents.orchestrator.get_topics", return_value=topics)
-    mocker.patch("app.agents.orchestrator.generate_post", side_effect=[False, True])
+    mocker.patch("app.agents.orchestrator.generate_post", side_effect=[None, approved])
     mock_mark_status = mocker.patch("app.agents.orchestrator.mark_topic_status")
+    mocker.patch("app.agents.orchestrator.publish_post")
 
     await orchestrator.run_pipeline()
 
@@ -43,13 +49,31 @@ async def test_run_pipeline_tries_next_topic_after_rejection(mocker):
 async def test_run_pipeline_regenerates_when_all_topics_rejected(mocker):
     first_batch = [_FakeTopic(id=1)]
     second_batch = [_FakeTopic(id=2)]
-    mock_get_topics = mocker.patch("app.agents.orchestrator.get_topics", side_effect=[first_batch, second_batch])
-    mocker.patch("app.agents.orchestrator.generate_post", side_effect=[False, True])
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")
+    mock_get_topics = mocker.patch(
+        "app.agents.orchestrator.get_topics", side_effect=[first_batch, second_batch]
+    )
+    mocker.patch("app.agents.orchestrator.generate_post", side_effect=[None, approved])
     mocker.patch("app.agents.orchestrator.mark_topic_status")
+    mocker.patch("app.agents.orchestrator.publish_post")
 
     await orchestrator.run_pipeline()
 
     assert mock_get_topics.call_count == 2
+
+
+@pytest.mark.asyncio
+async def test_run_pipeline_logs_and_continues_when_linkedin_publish_fails(mocker):
+    topics = [_FakeTopic(id=1)]
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")
+    mocker.patch("app.agents.orchestrator.get_topics", return_value=topics)
+    mocker.patch("app.agents.orchestrator.generate_post", side_effect=[approved])
+    mock_mark_status = mocker.patch("app.agents.orchestrator.mark_topic_status")
+    mocker.patch("app.agents.orchestrator.publish_post", side_effect=LinkedInPublishError("boom"))
+
+    await orchestrator.run_pipeline()
+
+    mock_mark_status.assert_called_once_with(1, STATUS_USED)
 
 
 @pytest.mark.asyncio
