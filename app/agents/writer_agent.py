@@ -1,5 +1,6 @@
 import asyncio
 import json
+from dataclasses import dataclass
 from typing import TypedDict
 
 from google.genai import types
@@ -14,6 +15,12 @@ from app.discord.views import ApprovalDecision, PostApprovalView
 from app.utils.logger import setup_logger
 
 logger = setup_logger("writer-agent")
+
+
+@dataclass
+class ApprovedPost:
+    linkedin_content: str
+    x_content: str
 
 
 class DraftPost(TypedDict):
@@ -144,5 +151,8 @@ async def generate_post(topic: Topic) -> bool:
 
         if decision == ApprovalDecision.RETRY:
             continue
+        if decision == ApprovalDecision.ACCEPTED:
+            ApprovedPost(linkedin_content=linkedin_post, x_content=x_post)
+            return True
 
-        return decision == ApprovalDecision.ACCEPTED
+        return False

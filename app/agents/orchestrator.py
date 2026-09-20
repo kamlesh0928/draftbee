@@ -2,6 +2,7 @@ from app.agents.writer_agent import generate_post
 from app.database.models.topic import STATUS_REJECTED, STATUS_USED
 from app.discovery.feeds import get_topics
 from app.discovery.repository import mark_topic_status
+from app.publishers.linkedin import LinkedInPublishError, publish_post
 from app.utils.logger import setup_logger
 
 logger = setup_logger("orchestrator")
@@ -15,9 +16,15 @@ async def run_pipeline() -> None:
         for topic in topics:
             assert topic.id is not None, "topic must be persisted before use"
 
-            if await generate_post(topic):
+            approved = await generate_post(topic)
+            if approved is not None:
                 mark_topic_status(topic.id, STATUS_USED)
-                return
+
+                # try:
+                #     publish_post(linkedin_content)
+                # except LinkedInPublishError:
+                #     logger.exception("Failed to publish to LinkedIn for topic '%s'", topic.title)
+                # return
 
             mark_topic_status(topic.id, STATUS_REJECTED)
 
