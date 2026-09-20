@@ -2,7 +2,6 @@ from app.agents.writer_agent import generate_post
 from app.database.models.topic import STATUS_REJECTED, STATUS_USED
 from app.discovery.feeds import get_topics
 from app.discovery.repository import mark_topic_status
-from app.publishers.linkedin import LinkedInPublishError, publish_post
 from app.utils.logger import setup_logger
 
 logger = setup_logger("orchestrator")
