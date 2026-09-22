@@ -44,4 +44,8 @@ jobs:
                 LINKEDIN_REFRESH_TOKEN: "refresh-token"
                 LINKEDIN_PERSON_ID: "person-id"
                 LINKEDIN_API_VERSION: "api-version"
+                X_CLIENT_ID: "your_client_id"
+                X_CLIENT_SECRET: "your_client_secret"
+                X_ACCESS_TOKEN: "your_access_token_here"
+                X_REFRESH_TOKEN: "your_refresh_token"
               run: pytest -v

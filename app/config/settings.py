@@ -28,6 +28,12 @@ class Settings(BaseSettings):
     LINKEDIN_PERSON_ID: str
     LINKEDIN_API_VERSION: str
 
+    # X
+    X_CLIENT_ID: str
+    X_CLIENT_SECRET: str
+    X_ACCESS_TOKEN: str
+    X_REFRESH_TOKEN: str
+
 
 settings = Settings()
 
