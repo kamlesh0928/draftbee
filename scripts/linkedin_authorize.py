@@ -6,7 +6,7 @@ Starts a tiny local server to catch LinkedIn's redirect automatically.
 import threading
 import webbrowser
 from http.server import BaseHTTPRequestHandler, HTTPServer
-from urllib.parse import urlencode, urlparse, parse_qs
+from urllib.parse import parse_qs, urlencode, urlparse
 
 import httpx
 
