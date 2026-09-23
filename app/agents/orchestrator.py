@@ -4,8 +4,8 @@ from app.discovery.feeds import get_topics
 from app.discovery.repository import mark_topic_status
 from app.publishers.linkedin import LinkedInPublishError
 from app.publishers.linkedin import publish_post as publish_linkedin_post
-from app.publishers.x import XPublishError
-from app.publishers.x import publish_post as publish_x_post
+
+# from app.publishers.x import XPublishError    # Uncomment - If added credits on X platform.
 from app.utils.logger import setup_logger
 
 logger = setup_logger("orchestrator")
@@ -32,10 +32,11 @@ async def run_pipeline() -> None:
                 except LinkedInPublishError:
                     logger.exception("Failed to publish to LinkedIn for topic '%s'", topic.title)
 
-                try:
-                    publish_x_post(approved.x_content)
-                except XPublishError:
-                    logger.exception("Failed to publish to X for topic '%s'", topic.title)
+                # Uncomment - If added credits on X platform.
+                # try:
+                #     publish_x_post(approved.x_content)
+                # except XPublishError:
+                #     logger.exception("Failed to publish to X for topic '%s'", topic.title)
 
                 return
 
