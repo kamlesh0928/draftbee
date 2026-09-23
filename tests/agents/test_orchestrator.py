@@ -35,12 +35,12 @@ async def test_run_pipeline_stops_on_first_accepted_topic(mocker):
 @pytest.mark.asyncio
 async def test_run_pipeline_tries_next_topic_after_rejection(mocker):
     topics = [_FakeTopic(id=1), _FakeTopic(id=2)]
-    approved = mocker.Mock(linkedin_content="Fake LinkedIn content", x_content="Fake X content")
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")    # Uncomment - If added credits on X platform. Add {x_content="Fake X content"} in the Mock parameter
     mocker.patch("app.agents.orchestrator.get_topics", return_value=topics)
     mocker.patch("app.agents.orchestrator.generate_post", side_effect=[None, approved])
     mock_mark_status = mocker.patch("app.agents.orchestrator.mark_topic_status")
     mocker.patch("app.agents.orchestrator.publish_linkedin_post")
-    mocker.patch("app.agents.orchestrator.publish_x_post")
+    # mocker.patch("app.agents.orchestrator.publish_x_post")    # Uncomment - If added credits on X platform.
 
     await orchestrator.run_pipeline()
 
@@ -54,7 +54,7 @@ async def test_run_pipeline_tries_next_topic_after_rejection(mocker):
 async def test_run_pipeline_regenerates_when_all_topics_rejected(mocker):
     first_batch = [_FakeTopic(id=1)]
     second_batch = [_FakeTopic(id=2)]
-    approved = mocker.Mock(linkedin_content="Fake LinkedIn content", x_content="Fake X content")
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")    # Uncomment - If added credits on X platform. Add {x_content="Fake X content"} in the Mock parameter
     mock_get_topics = mocker.patch(
         "app.agents.orchestrator.get_topics", side_effect=[first_batch, second_batch]
     )
@@ -71,7 +71,7 @@ async def test_run_pipeline_regenerates_when_all_topics_rejected(mocker):
 @pytest.mark.asyncio
 async def test_run_pipeline_logs_and_continues_when_linkedin_publish_fails(mocker):
     topics = [_FakeTopic(id=1)]
-    approved = mocker.Mock(linkedin_content="Fake LinkedIn content", x_content="Fake X content")
+    approved = mocker.Mock(linkedin_content="Fake LinkedIn content")    # Uncomment - If added credits on X platform. Add {x_content="Fake X content"} in the Mock parameter
     mocker.patch("app.agents.orchestrator.get_topics", return_value=topics)
     mocker.patch("app.agents.orchestrator.generate_post", side_effect=[approved])
     mock_mark_status = mocker.patch("app.agents.orchestrator.mark_topic_status")
