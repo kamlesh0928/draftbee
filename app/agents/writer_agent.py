@@ -20,7 +20,7 @@ logger = setup_logger("writer-agent")
 @dataclass
 class ApprovedPost:
     linkedin_content: str
-    x_content: str
+    # x_content: str    # Uncomment - If added credits on X platform.
 
 
 class DraftPost(TypedDict):
@@ -33,15 +33,15 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
     prompt = f"""
                 Role: {CREATOR_PERSONA}
 
-                Task: Write an engaging LinkedIn and X (Twitter) post about "{topic.title}".
+                Task: Write an engaging LinkedIn post about "{topic.title}".
                 Context: {topic.description}
-                Include relevant hashtags only in the LinkedIn post; the X post must have no hashtags.
+                Include relevant hashtags only in the LinkedIn post;
 
                 Output Format:
-                Return ONLY a valid JSON array of 2 objects (LinkedIn and X). Do not include Markdown, code fences, unnecessary emojis, or additional text.
+                Return ONLY a valid JSON array of 1 object LinkedIn. Do not include Markdown, code fences, unnecessary emojis, or additional text.
 
                 Each object must contain:
-                - "platform": LinkedIn/X
+                - "platform": LinkedIn
                 - "post_content": The complete post
 
                 The post should read like a human wrote it, in simple English.
@@ -65,8 +65,8 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}") from e
 
-    if not isinstance(posts, list) or len(posts) != 2:
-        raise ValueError("Expected a JSON array containing exactly 2 posts.")
+    # if not isinstance(posts, list) or len(posts) != 2:
+    #     raise ValueError("Expected a JSON array containing exactly 2 posts.")
 
     validated_posts: list[DraftPost] = []
 
@@ -113,30 +113,32 @@ async def generate_post(topic: Topic) -> ApprovedPost | None:
             None,
         )
 
-        x_post = next(
-            (
-                p["post_content"]
-                for p in posts
-                if p["platform"] == "X"
-            ),
-            None,
-        )
+        # Uncomment - If added credits on X platform.
+        # x_post = next(
+        #     (
+        #         p["post_content"]
+        #         for p in posts
+        #         if p["platform"] == "X"
+        #     ),
+        #     None,
+        # )
 
         if linkedin_post is None:
             raise ValueError(
                 "Gemini response does not contain a valid LinkedIn post."
             )
 
-        if x_post is None:
-            raise ValueError(
-                "Gemini response does not contain a valid X post."
-            )
+        # Uncomment - If added credits on X platform.
+        # if x_post is None:
+        #     raise ValueError(
+        #         "Gemini response does not contain a valid X post."
+        #     )
 
+        # Add `x_post` this in the below parameter when posting on X as well.
         embed = build_post_preview_embed(
             topic.title,
             linkedin_post,
-            x_post,
-        )
+        )       
 
         view = PostApprovalView()
         view.message = await send_for_approval(embed, view)
@@ -152,6 +154,6 @@ async def generate_post(topic: Topic) -> ApprovedPost | None:
         if decision == ApprovalDecision.RETRY:
             continue
         if decision == ApprovalDecision.ACCEPTED:
-            return ApprovedPost(linkedin_content=linkedin_post, x_content=x_post)
+            return ApprovedPost(linkedin_content=linkedin_post) # Add `x_content=x_post` this in the below parameter when posting on X as well.
 
         return None
