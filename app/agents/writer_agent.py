@@ -65,8 +65,8 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}") from e
 
-    # if not isinstance(posts, list) or len(posts) != 2:
-    #     raise ValueError("Expected a JSON array containing exactly 2 posts.")
+    if not isinstance(posts, list) or len(posts) != 2:
+        raise ValueError("Expected a JSON array containing exactly 2 posts.")
 
     validated_posts: list[DraftPost] = []
 
@@ -154,6 +154,6 @@ async def generate_post(topic: Topic) -> ApprovedPost | None:
         if decision == ApprovalDecision.RETRY:
             continue
         if decision == ApprovalDecision.ACCEPTED:
-            return ApprovedPost(linkedin_content=linkedin_post) # Add `x_content=x_post` this in the below parameter when posting on X as well.
+            return ApprovedPost(linkedin_content=linkedin_post) # Add `x_content=x_post` this in the parameter when posting on X as well.
 
         return None

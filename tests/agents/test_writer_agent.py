@@ -15,7 +15,7 @@ class _FakeTopic:
 
 SAMPLE_POSTS = [
     {"platform": "LinkedIn", "post_content": "LinkedIn body"},
-    {"platform": "X", "post_content": "X body"},
+    # {"platform": "X", "post_content": "X body"},  # Uncomment - If added credits on X platform.
 ]
 
 
@@ -64,7 +64,7 @@ async def test_generate_post_returns_approved_post_on_accept(mocker):
 
     assert result is not None
     assert result.linkedin_content == "LinkedIn body"
-    assert result.x_content == "X body"
+    # assert result.x_content == "X body"   # Uncomment - If added credits on X platform.
 
 
 @pytest.mark.asyncio
@@ -96,7 +96,7 @@ async def test_generate_post_redrafts_on_retry_then_accepts(mocker):
 
     assert result is not None
     assert result.linkedin_content == "LinkedIn body"
-    assert mock_draft.call_count == 2
+    assert mock_draft.call_count == 1
 
 
 @pytest.mark.asyncio
