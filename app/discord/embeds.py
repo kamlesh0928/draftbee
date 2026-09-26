@@ -1,12 +1,15 @@
 import discord
 
 
-def build_post_preview_embed(topic_title: str, linkedin_content: str, x_content: str) -> discord.Embed:
+# Add `x_content: str` this in the below parameter when posting on X as well.
+def build_post_preview_embed(topic_title: str, linkedin_content: str) -> discord.Embed:
     embed = discord.Embed(
         title=f"New post idea: {topic_title}",
+        description=linkedin_content[:4096],
         color=discord.Color.blurple(),
     )
 
-    embed.add_field(name="LinkedIn", value=linkedin_content[:1024], inline=False)
-    embed.add_field(name="X", value=x_content[:1024], inline=False)
+    # Uncomment below lines if posting on X as well. Also remove line 8.
+    # embed.add_field(name="LinkedIn", value=linkedin_content[:4096], inline=False)
+    # embed.add_field(name="X", value=x_content[:1024], inline=False)
     return embed
