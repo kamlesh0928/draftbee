@@ -1,8 +1,9 @@
 from __future__ import annotations
 
-from sqlalchemy import CheckConstraint, Column, DateTime, Integer, String, Text
-from sqlalchemy.orm import relationship
-from sqlalchemy.sql import func
+from datetime import datetime
+
+from sqlalchemy import CheckConstraint, DateTime, Integer, String, Text, func
+from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database.base import Base
 
@@ -20,12 +21,13 @@ class Topic(Base):
         ),
     )
 
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String(255), nullable=False)
-    description = Column(Text, nullable=True)
-    rank = Column(Integer, nullable=False)
-    explanation = Column(Text, nullable=True)
-    status = Column(String(20), nullable=False, default=STATUS_PENDING)
-    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, index=True)
+    title: Mapped[str] = mapped_column(String(255), nullable=False)
+    description: Mapped[str | None] = mapped_column(Text, nullable=True)
+    rank: Mapped[int] = mapped_column(Integer, nullable=False)
+    explanation: Mapped[str | None] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), nullable=False, default=STATUS_PENDING)
+    created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), server_default=func.now())
 
     posts = relationship("Post", back_populates="topic", uselist=True)  # type: ignore
+    
