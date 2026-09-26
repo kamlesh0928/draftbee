@@ -53,6 +53,7 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             temperature=0.4,
+            max_output_tokens=2048
         ),
     )
 
@@ -65,8 +66,8 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
     except json.JSONDecodeError as e:
         raise ValueError(f"Failed to parse JSON from the response: {e}") from e
 
-    if not isinstance(posts, list) or len(posts) != 2:
-        raise ValueError("Expected a JSON array containing exactly 2 posts.")
+    if not isinstance(posts, list) or len(posts) != 1:
+        raise ValueError("Expected a JSON array containing exactly 1 post.")
 
     validated_posts: list[DraftPost] = []
 
@@ -144,7 +145,6 @@ async def generate_post(topic: Topic) -> ApprovedPost | None:
         view.message = await send_for_approval(embed, view)
 
         decision = await view.wait_for_decision()
-
         logger.info(
             "Reviewer decision for '%s': %s",
             topic.title,

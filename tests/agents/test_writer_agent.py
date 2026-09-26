@@ -31,7 +31,7 @@ def test_draft_post_returns_validated_posts(mocker):
 
 
 def test_draft_post_raises_on_wrong_item_count(mocker):
-    fake_response = mocker.Mock(text=json.dumps([SAMPLE_POSTS[0]]))
+    fake_response = mocker.Mock(text=json.dumps(SAMPLE_POSTS + SAMPLE_POSTS))
     mock_client = mocker.Mock()
     mock_client.models.generate_content.return_value = fake_response
     mocker.patch("app.agents.writer_agent.get_client", return_value=mock_client)
@@ -41,7 +41,7 @@ def test_draft_post_raises_on_wrong_item_count(mocker):
 
 
 def test_draft_post_raises_on_non_string_platform(mocker):
-    bad_posts = [{"platform": 123, "post_content": "X"}, SAMPLE_POSTS[1]]
+    bad_posts = [{"platform": 123, "post_content": "X"}]
     fake_response = mocker.Mock(text=json.dumps(bad_posts))
     mock_client = mocker.Mock()
     mock_client.models.generate_content.return_value = fake_response
@@ -96,7 +96,7 @@ async def test_generate_post_redrafts_on_retry_then_accepts(mocker):
 
     assert result is not None
     assert result.linkedin_content == "LinkedIn body"
-    assert mock_draft.call_count == 1
+    assert mock_draft.call_count == 2
 
 
 @pytest.mark.asyncio
