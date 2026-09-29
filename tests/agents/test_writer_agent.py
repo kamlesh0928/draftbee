@@ -19,8 +19,14 @@ SAMPLE_POSTS = [
 ]
 
 
+def _fake_gemini_response(mocker, text: str, finish_reason: str = "STOP"):
+    """Build a mock Gemini response with a normal finish_reason, so tests reach the actual JSON parsing."""
+    fake_candidate = mocker.Mock(finish_reason=finish_reason)
+    return mocker.Mock(text=text, candidates=[fake_candidate])
+
+
 def test_draft_post_returns_validated_posts(mocker):
-    fake_response = mocker.Mock(text=json.dumps(SAMPLE_POSTS))
+    fake_response = _fake_gemini_response(mocker, json.dumps(SAMPLE_POSTS))
     mock_client = mocker.Mock()
     mock_client.models.generate_content.return_value = fake_response
     mocker.patch("app.agents.writer_agent.get_client", return_value=mock_client)
@@ -31,7 +37,7 @@ def test_draft_post_returns_validated_posts(mocker):
 
 
 def test_draft_post_raises_on_wrong_item_count(mocker):
-    fake_response = mocker.Mock(text=json.dumps(SAMPLE_POSTS + SAMPLE_POSTS))
+    fake_response = _fake_gemini_response(mocker, json.dumps(SAMPLE_POSTS + SAMPLE_POSTS))
     mock_client = mocker.Mock()
     mock_client.models.generate_content.return_value = fake_response
     mocker.patch("app.agents.writer_agent.get_client", return_value=mock_client)
@@ -42,12 +48,22 @@ def test_draft_post_raises_on_wrong_item_count(mocker):
 
 def test_draft_post_raises_on_non_string_platform(mocker):
     bad_posts = [{"platform": 123, "post_content": "X"}]
-    fake_response = mocker.Mock(text=json.dumps(bad_posts))
+    fake_response = _fake_gemini_response(mocker, json.dumps(bad_posts))
     mock_client = mocker.Mock()
     mock_client.models.generate_content.return_value = fake_response
     mocker.patch("app.agents.writer_agent.get_client", return_value=mock_client)
 
     with pytest.raises(TypeError):
+        writer_agent._draft_post(_FakeTopic())
+
+
+def test_draft_post_raises_when_gemini_hits_max_tokens(mocker):
+    fake_response = _fake_gemini_response(mocker, text=None, finish_reason="MAX_TOKENS")
+    mock_client = mocker.Mock()
+    mock_client.models.generate_content.return_value = fake_response
+    mocker.patch("app.agents.writer_agent.get_client", return_value=mock_client)
+
+    with pytest.raises(ValueError, match="cut off"):
         writer_agent._draft_post(_FakeTopic())
 
 
@@ -64,7 +80,6 @@ async def test_generate_post_returns_approved_post_on_accept(mocker):
 
     assert result is not None
     assert result.linkedin_content == "LinkedIn body"
-    # assert result.x_content == "X body"   # Uncomment - If added credits on X platform.
 
 
 @pytest.mark.asyncio
@@ -103,3 +118,4 @@ async def test_generate_post_redrafts_on_retry_then_accepts(mocker):
 async def test_generate_post_raises_when_topic_title_is_none():
     with pytest.raises(ValueError):
         await writer_agent.generate_post(_FakeTopic(title=None))
+        
