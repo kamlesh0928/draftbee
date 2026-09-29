@@ -29,20 +29,24 @@ class DraftPost(TypedDict):
 
 
 def _draft_post(topic: Topic) -> list[DraftPost]:
-    """Ask Gemini for one LinkedIn + X draft. Blocking — call via asyncio.to_thread."""
+    """Ask Gemini for one LinkedIn draft. Blocking - call via asyncio.to_thread."""
     prompt = f"""
                 Role: {CREATOR_PERSONA}
 
-                Task: Write an engaging LinkedIn post about "{topic.title}".
+                Task: Write a complete, engaging LinkedIn post about "{topic.title}".
                 Context: {topic.description}
-                Include relevant hashtags only in the LinkedIn post;
+
+                Requirements:
+                - Write 150 to 250 words across 3 to 5 short paragraphs: a hook, a body with a concrete insight or example, and a closing thought or question that invites engagement.
+                - Write the full post exactly as it should appear on LinkedIn - not a summary or a teaser.
+                - End the post with 3 to 5 relevant hashtags, specific to this post's actual subject matter.
 
                 Output Format:
-                Return ONLY a valid JSON array of 1 object LinkedIn. Do not include Markdown, code fences, unnecessary emojis, or additional text.
+                Return ONLY a valid JSON array containing exactly 1 object. Do not include Markdown, code fences, unnecessary emojis, or additional text.
 
-                Each object must contain:
-                - "platform": LinkedIn
-                - "post_content": The complete post
+                The object must contain:
+                - "platform": "LinkedIn"
+                - "post_content": The complete post, including the hashtags at the end
 
                 The post should read like a human wrote it, in simple English.
                 """
@@ -53,9 +57,21 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
             temperature=0.4,
-            max_output_tokens=2048
+            max_output_tokens=4096,
+            thinking_config=types.ThinkingConfig(thinking_level="MINIMAL"),
         ),
     )
+
+    finish_reason = None
+    if response.candidates:
+        raw_reason = response.candidates[0].finish_reason
+        finish_reason = getattr(raw_reason, "name", raw_reason)
+
+    if finish_reason == "MAX_TOKENS":
+        raise ValueError(
+            "Gemini's response was cut off before finishing the post (hit max_output_tokens). "
+            "This usually resolves on a retry."
+        )
 
     response_text = response.text
     if response_text is None:
@@ -84,12 +100,7 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
         if not isinstance(post_content, str):
             raise TypeError("Post content must be a string.")
 
-        validated_posts.append(
-            {
-                "platform": platform,
-                "post_content": post_content,
-            }
-        )
+        validated_posts.append({"platform": platform, "post_content": post_content})
 
     return validated_posts
 
