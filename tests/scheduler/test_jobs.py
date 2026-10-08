@@ -13,20 +13,19 @@ async def test_scheduled_run_calls_run_pipeline(mocker):
 
 
 def test_start_scheduler_is_idempotent(mocker):
-    mocker.patch.object(jobs._scheduler, "running", False)
-    mock_add_job = mocker.patch.object(jobs._scheduler, "add_job")
-    mock_start = mocker.patch.object(jobs._scheduler, "start")
+    mock_scheduler = mocker.patch.object(jobs, "_scheduler")
+    mock_scheduler.running = False
 
     jobs.start_scheduler()
 
-    mock_add_job.assert_called_once()
-    mock_start.assert_called_once()
+    mock_scheduler.add_job.assert_called_once()
+    mock_scheduler.start.assert_called_once()
 
 
 def test_start_scheduler_does_nothing_if_already_running(mocker):
-    mocker.patch.object(jobs._scheduler, "running", True)
-    mock_add_job = mocker.patch.object(jobs._scheduler, "add_job")
+    mock_scheduler = mocker.patch.object(jobs, "_scheduler")
+    mock_scheduler.running = True
 
     jobs.start_scheduler()
 
-    mock_add_job.assert_not_called()
+    mock_scheduler.add_job.assert_not_called()
