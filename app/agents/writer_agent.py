@@ -107,8 +107,9 @@ def _draft_post(topic: Topic) -> list[DraftPost]:
 
 async def generate_post(topic: Topic) -> ApprovedPost | None:
     """
-    Draft a post for `topic`, send it to Discord, and keep regenerating on
-    "Re-try" until the reviewer Accepts or Rejects. Returns True if accepted.
+    Draft a LinkedIn post for `topic`, send it to Discord, and keep
+    regenerating on "Re-try" until the reviewer Accepts or Rejects.
+    Returns the approved content, or None if rejected.
     """
     if topic.title is None:
         raise ValueError("Topic title cannot be None.")

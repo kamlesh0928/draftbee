@@ -4,7 +4,7 @@ from app.database.models.topic import STATUS_PENDING, Topic
 
 def get_pending_topics() -> list[Topic]:
     """
-    Get unused ides from a previous run. Return the best ranked first.
+    Unused ideas from a previous run, best-ranked first.
     """
     with SessionLocal() as session:
         return (
