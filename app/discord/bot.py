@@ -26,11 +26,18 @@ async def send_for_approval(embed: discord.Embed, view: discord.ui.View) -> disc
 
 @bot.event
 async def on_ready() -> None:
+    # Deferred import - avoids a circular import, since scheduler/jobs.py
+    # pulls in orchestrator.py, which pulls in writer_agent.py, which
+    # imports send_for_approval from this very module.
+    from app.scheduler.jobs import start_scheduler
+
     guild = discord.Object(id=settings.DISCORD_SERVER_ID)
     bot.tree.copy_global_to(guild=guild)
     synced = await bot.tree.sync(guild=guild)
     logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_SERVER_ID)
     logger.info("Discord bot logged in as %s", bot.user)
+
+    start_scheduler()
 
 
 def run_discord_bot() -> None:
