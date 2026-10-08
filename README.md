@@ -1,1 +1,3 @@
-# This is a bot which will help me to post content on LinkedIn and Twitter automatically.
+# AI Content Engine
+
+A bot that discovers trending dev topics, drafts LinkedIn posts with Gemini, and publishes on approval via Discord.
