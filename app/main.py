@@ -2,7 +2,7 @@ import uvicorn
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-app = FastAPI(title="AI Content Engine")
+app = FastAPI(title="Draftbee")
 
 app.add_middleware(
     CORSMiddleware,
