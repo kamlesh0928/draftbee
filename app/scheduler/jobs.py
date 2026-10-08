@@ -6,7 +6,7 @@ on-demand /generate Discord command (app/discord/commands.py) - both
 trigger the exact same pipeline, just on a different schedule.
 """
 
-from datetime import datetime
+from datetime import datetime, timezone
 
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.interval import IntervalTrigger
@@ -43,7 +43,7 @@ def start_scheduler() -> None:
         id="post-every-1-day",
         # Fires once immediately on startup, then every 1 days after that.
         # Remove `next_run_time` if you'd rather wait a full 1 days before the first post.
-        next_run_time=datetime.now(),
+        next_run_time=datetime.now(timezone.utc),
         replace_existing=True,
         max_instances=1,  # skip a run if the previous one is still in progress
     )
