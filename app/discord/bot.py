@@ -41,8 +41,4 @@ async def on_ready() -> None:
 
 
 def run_discord_bot() -> None:
-    from app.discord import (
-        commands as _commands,  # noqa: F401 — registers /generate via decorator
-    )
-
     bot.run(settings.DISCORD_BOT_TOKEN)
