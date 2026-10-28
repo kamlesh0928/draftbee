@@ -24,21 +24,38 @@ async def send_for_approval(embed: discord.Embed, view: discord.ui.View) -> disc
     return await channel.send(embed=embed, view=view)
 
 
+_startup_done = False  # on_ready can fire again after a reconnect; startup work must run once
+
+
 @bot.event
 async def on_ready() -> None:
-    # Deferred import - avoids a circular import, since scheduler/jobs.py
-    # pulls in orchestrator.py, which pulls in writer_agent.py, which
-    # imports send_for_approval from this very module.
+    global _startup_done
+    if _startup_done:
+        return
+    _startup_done = True
+
+    # Deferred import - avoids a circular import, since scheduler/jobs.py pulls in
+    # orchestrator.py -> writer_agent.py, which imports send_for_approval from this module.
     from app.scheduler.jobs import start_scheduler
+
+    logger.info("Discord bot logged in as %s", bot.user)
 
     guild = discord.Object(id=settings.DISCORD_SERVER_ID)
     bot.tree.copy_global_to(guild=guild)
-    synced = await bot.tree.sync(guild=guild)
-    logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_SERVER_ID)
-    logger.info("Discord bot logged in as %s", bot.user)
+    try:
+        synced = await bot.tree.sync(guild=guild)
+        logger.info("Synced %d slash command(s) to guild %s", len(synced), settings.DISCORD_SERVER_ID)
+    except discord.HTTPException:
+        # No retry: repeated failed calls make a rate limit worse. Commands synced earlier
+        # stay registered in Discord, and the scheduler below must still start.
+        logger.exception("Could not sync slash commands.")
 
     start_scheduler()
 
 
 def run_discord_bot() -> None:
+    # Imported here, not at the top, to avoid a circular import (commands.py imports this
+    # module). This import is what registers /generate.
+    from app.discord import commands as _commands  # noqa: F401
+
     bot.run(settings.DISCORD_BOT_TOKEN)
